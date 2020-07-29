@@ -152,7 +152,7 @@ pub fn snap(client: &Client) -> (Box<SnapshotReader>, TempDir) {
 /// write into the given database.
 pub fn restore(
 	db: Arc<BlockChainDB>,
-	engine: &EthEngine,
+	engine: &dyn EthEngine,
 	reader: &SnapshotReader,
 	genesis: &[u8],
 ) -> Result<(), ::error::Error> {

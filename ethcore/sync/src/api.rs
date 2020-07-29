@@ -267,7 +267,7 @@ pub struct Params {
 	/// Configuration.
 	pub config: SyncConfig,
 	/// Blockchain client.
-	pub chain: Arc<BlockChainClient>,
+	pub chain: Arc<dyn BlockChainClient>,
 	/// Snapshot service.
 	pub snapshot_service: Arc<SnapshotService>,
 	/// Private tx service.
@@ -432,7 +432,7 @@ pub(crate) const PRIORITY_TIMER_INTERVAL: Duration = Duration::from_millis(250);
 
 struct SyncProtocolHandler {
 	/// Shared blockchain client.
-	chain: Arc<BlockChainClient>,
+	chain: Arc<dyn BlockChainClient>,
 	/// Shared snapshot service.
 	snapshot_service: Arc<SnapshotService>,
 	/// Sync strategy
@@ -594,7 +594,7 @@ impl ChainNotify for EthSync {
 
 /// PIP event handler.
 /// Simply queues transactions from light client peers.
-struct TxRelay(Arc<BlockChainClient>);
+struct TxRelay(Arc<dyn BlockChainClient>);
 
 impl LightHandler for TxRelay {
 	fn on_transactions(&self, ctx: &EventContext, relay: &[::types::transaction::UnverifiedTransaction]) {

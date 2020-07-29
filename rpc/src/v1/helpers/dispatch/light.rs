@@ -45,7 +45,7 @@ where
 	/// Sync service.
 	pub sync: Arc<S>,
 	/// Header chain client.
-	pub client: Arc<LightChainClient>,
+	pub client: Arc<dyn LightChainClient>,
 	/// On-demand request service.
 	pub on_demand: Arc<OD>,
 	/// Data cache.

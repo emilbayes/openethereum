@@ -19,7 +19,7 @@ use std::collections::{HashSet, BTreeMap, VecDeque};
 use std::str::FromStr;
 use std::str::from_utf8;
 use std::convert::TryFrom;
-use std::sync::atomic::{AtomicUsize, AtomicI64, AtomicBool, Ordering as AtomicOrdering};
+use std::sync::atomic::{AtomicI64, AtomicBool, Ordering as AtomicOrdering};
 use std::sync::{Arc, Weak};
 use std::io::{BufReader, BufRead};
 use std::time::{Duration, Instant};
@@ -68,8 +68,8 @@ use client::bad_blocks;
 use engines::{MAX_UNCLE_AGE, EthEngine, EpochTransition, ForkChoice, EngineError};
 use engines::epoch::PendingTransition;
 use error::{
-	ImportErrorKind, ExecutionError, CallError, BlockError, ImportError,
-	QueueError, QueueErrorKind, Error as EthcoreError, EthcoreResult, ErrorKind as EthcoreErrorKind
+	ImportErrorKind, ExecutionError, CallError, BlockError,
+	Error as EthcoreError, EthcoreResult, ErrorKind as EthcoreErrorKind
 };
 use executive::{Executive, Executed, TransactOptions, contract_address};
 use factory::{Factories, VmFactory};
@@ -172,7 +172,7 @@ struct Importer {
 	pub ancient_verifier: AncientVerifier,
 
 	/// Ethereum engine to be used during import
-	pub engine: Arc<EthEngine>,
+	pub engine: Arc<dyn EthEngine>,
 
 	/// A lru cache of recently detected bad blocks
 	pub bad_blocks: bad_blocks::BadBlocks,
@@ -194,7 +194,7 @@ pub struct Client {
 
 	chain: RwLock<Arc<BlockChain>>,
 	tracedb: RwLock<TraceDB<BlockChain>>,
-	engine: Arc<EthEngine>,
+	engine: Arc<dyn EthEngine>,
 
 	/// Client configuration
 	config: ClientConfig,
@@ -252,7 +252,7 @@ pub struct Client {
 impl Importer {
 	pub fn new(
 		config: &ClientConfig,
-		engine: Arc<EthEngine>,
+		engine: Arc<dyn EthEngine>,
 		message_channel: IoChannel<ClientIoMessage>,
 		miner: Arc<Miner>,
 	) -> Result<Importer, EthcoreError> {
@@ -285,7 +285,7 @@ impl Importer {
 		let (imported_blocks, import_results, invalid_blocks, imported, proposed_blocks, duration, has_more_blocks_to_import) = {
 			let mut imported_blocks = Vec::with_capacity(max_blocks_to_import);
 			let mut invalid_blocks = HashSet::new();
-			let mut proposed_blocks = Vec::with_capacity(max_blocks_to_import);
+			let proposed_blocks = Vec::with_capacity(max_blocks_to_import);
 			let mut import_results = Vec::with_capacity(max_blocks_to_import);
 
 			let _import_lock = self.import_lock.lock();
@@ -461,7 +461,7 @@ impl Importer {
 	///
 	/// The block is guaranteed to be the next best blocks in the
 	/// first block sequence. Does no sealing or transaction validation.
-	fn import_old_block(&self, unverified: Unverified, receipts_bytes: &[u8], db: &KeyValueDB, chain: &BlockChain) -> EthcoreResult<()> {
+	fn import_old_block(&self, unverified: Unverified, receipts_bytes: &[u8], db: &dyn KeyValueDB, chain: &BlockChain) -> EthcoreResult<()> {
 		let receipts = ::rlp::decode_list(receipts_bytes);
 		let _import_lock = self.import_lock.lock();
 
@@ -723,7 +723,7 @@ impl Client {
 	pub fn new(
 		config: ClientConfig,
 		spec: &Spec,
-		db: Arc<BlockChainDB>,
+		db: Arc<dyn BlockChainDB>,
 		miner: Arc<Miner>,
 		message_channel: IoChannel<ClientIoMessage>,
 	) -> Result<Arc<Client>, ::error::Error> {
@@ -865,7 +865,7 @@ impl Client {
 	}
 
 	/// Adds an actor to be notified on certain events
-	pub fn add_notify(&self, target: Arc<ChainNotify>) {
+	pub fn add_notify(&self, target: Arc<dyn ChainNotify>) {
 		self.notify.write().push(Arc::downgrade(&target));
 	}
 
@@ -878,11 +878,11 @@ impl Client {
 	}
 
 	/// Returns engine reference.
-	pub fn engine(&self) -> &EthEngine {
+	pub fn engine(&self) -> &dyn EthEngine {
 		&*self.engine
 	}
 
-	fn notify<F>(&self, f: F) where F: Fn(&ChainNotify) {
+	fn notify<F>(&self, f: F) where F: Fn(&dyn ChainNotify) {
 		for np in &*self.notify.read() {
 			if let Some(n) = np.upgrade() {
 				f(&*n);
@@ -1684,7 +1684,7 @@ impl Call for Client {
 }
 
 impl EngineInfo for Client {
-	fn engine(&self) -> &EthEngine {
+	fn engine(&self) -> &dyn EthEngine {
 		Client::engine(self)
 	}
 }
@@ -1704,7 +1704,7 @@ impl BlockChainClient for Client {
 		Ok(self.replay_block_transactions(block, analytics)?.nth(address.index).expect(PROOF).1)
 	}
 
-	fn replay_block_transactions(&self, block: BlockId, analytics: CallAnalytics) -> Result<Box<Iterator<Item = (H256, Executed)>>, CallError> {
+	fn replay_block_transactions(&self, block: BlockId, analytics: CallAnalytics) -> Result<Box<dyn Iterator<Item = (H256, Executed)>>, CallError> {
 		let mut env_info = self.env_info(block).ok_or(CallError::StatePruned)?;
 		let body = self.block_body(block).ok_or(CallError::StatePruned)?;
 		let mut state = self.state_at_beginning(block).ok_or(CallError::StatePruned)?;
@@ -2536,7 +2536,7 @@ impl super::traits::EngineClient for Client {
 		self.chain.read().epoch_transition_for(parent_hash)
 	}
 
-	fn as_full_client(&self) -> Option<&BlockChainClient> { Some(self) }
+	fn as_full_client(&self) -> Option<&dyn BlockChainClient> { Some(self) }
 
 	fn block_number(&self, id: BlockId) -> Option<BlockNumber> {
 		BlockChainClient::block_number(self, id)
@@ -2810,7 +2810,7 @@ impl IoChannelQueue {
 
 #[cfg(test)]
 mod tests {
-	use test_helpers::{generate_dummy_client, generate_dummy_client_with_data, generate_dummy_client_with_spec_and_data, get_good_dummy_block_hash};
+	use test_helpers::generate_dummy_client_with_spec_and_data;
 	use blockchain::{BlockProvider, ExtrasInsert};
 	use spec::Spec;
 

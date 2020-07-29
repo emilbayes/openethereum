@@ -67,7 +67,6 @@ use std::time;
 use std::time::{Instant, Duration, SystemTime, UNIX_EPOCH};
 
 use block::ExecutedBlock;
-use bytes::Bytes;
 use client::{BlockId, EngineClient, traits::ForceUpdateSealing};
 use engines::clique::util::{extract_signers, recover_creator};
 use engines::{Engine, EngineError, Seal};
@@ -161,10 +160,10 @@ pub struct Clique {
 	epoch_length: u64,
 	period: u64,
 	machine: EthereumMachine,
-	client: RwLock<Option<Weak<EngineClient>>>,
+	client: RwLock<Option<Weak<dyn EngineClient>>>,
 	block_state_by_hash: RwLock<LruCache<H256, CliqueBlockState>>,
 	proposals: RwLock<HashMap<Address, VoteType>>,
-	signer: RwLock<Option<Box<EngineSigner>>>,
+	signer: RwLock<Option<Box<dyn EngineSigner>>>,
 }
 
 #[cfg(test)]
@@ -173,10 +172,10 @@ pub struct Clique {
 	pub epoch_length: u64,
 	pub period: u64,
 	pub machine: EthereumMachine,
-	pub client: RwLock<Option<Weak<EngineClient>>>,
+	pub client: RwLock<Option<Weak<dyn EngineClient>>>,
 	pub block_state_by_hash: RwLock<LruCache<H256, CliqueBlockState>>,
 	pub proposals: RwLock<HashMap<Address, VoteType>>,
-	pub signer: RwLock<Option<Box<EngineSigner>>>,
+	pub signer: RwLock<Option<Box<dyn EngineSigner>>>,
 }
 
 impl Clique {
@@ -297,7 +296,7 @@ impl Clique {
 						"Back-filling block state. last_checkpoint_number: {}, target: {}({}).",
 						last_checkpoint_number, header.number(), header.hash());
 
-				let mut chain: &mut VecDeque<Header> = &mut VecDeque::with_capacity(
+				let chain: &mut VecDeque<Header> = &mut VecDeque::with_capacity(
 					(header.number() - last_checkpoint_number + 1) as usize);
 
 				// Put ourselves in.
@@ -370,7 +369,7 @@ impl Engine<EthereumMachine> for Clique {
 		&self,
 		_block: &mut ExecutedBlock,
 		_epoch_begin: bool,
-		_ancestry: &mut Iterator<Item=ExtendedHeader>,
+		_ancestry: &mut dyn Iterator<Item=ExtendedHeader>,
 	) -> Result<(), Error> {
 		Ok(())
 	}
@@ -736,12 +735,12 @@ impl Engine<EthereumMachine> for Clique {
 		}
 	}
 
-	fn set_signer(&self, signer: Box<EngineSigner>) {
+	fn set_signer(&self, signer: Box<dyn EngineSigner>) {
 		trace!(target: "engine", "set_signer: {}", signer.address());
 		*self.signer.write() = Some(signer);
 	}
 
-	fn register_client(&self, client: Weak<EngineClient>) {
+	fn register_client(&self, client: Weak<dyn EngineClient>) {
 		*self.client.write() = Some(client.clone());
 	}
 

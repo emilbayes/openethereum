@@ -19,6 +19,8 @@
 
 // TODO: fix endianess for big endian
 
+#![allow(deprecated)]
+
 use keccak::{keccak_512, keccak_256, H256};
 use cache::{NodeCache, NodeCacheBuilder};
 use progpow::{CDag, generate_cdag, progpow, keccak_f800_short, keccak_f800_long};

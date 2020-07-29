@@ -185,7 +185,7 @@ impl ChunkRebuilder {
 		&mut self,
 		last_verifier: &mut Option<Box<EpochVerifier<EthereumMachine>>>,
 		transition_rlp: Rlp,
-		engine: &EthEngine,
+		engine: &dyn EthEngine,
 	) -> Result<Verified, ::error::Error> {
 		use engines::ConstructedVerifier;
 
@@ -241,7 +241,7 @@ impl Rebuilder for ChunkRebuilder {
 	fn feed(
 		&mut self,
 		chunk: &[u8],
-		engine: &EthEngine,
+		engine: &dyn EthEngine,
 		abort_flag: &AtomicBool,
 	) -> Result<(), ::error::Error> {
 		let rlp = Rlp::new(chunk);
@@ -349,7 +349,7 @@ impl Rebuilder for ChunkRebuilder {
 		Ok(())
 	}
 
-	fn finalize(&mut self, _engine: &EthEngine) -> Result<(), ::error::Error> {
+	fn finalize(&mut self, _engine: &dyn EthEngine) -> Result<(), ::error::Error> {
 		if !self.had_genesis {
 			return Err(Error::WrongChunkFormat("No genesis transition included.".into()).into());
 		}

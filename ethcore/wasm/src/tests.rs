@@ -82,7 +82,7 @@ fn empty() {
 	let mut ext = FakeExt::new().with_wasm();
 
 	let gas_left = {
-		let mut interpreter = wasm_interpreter(params);
+		let interpreter = wasm_interpreter(params);
 		test_finalize(interpreter.exec(&mut ext).ok().unwrap()).unwrap()
 	};
 
@@ -111,7 +111,7 @@ fn logger() {
 	let mut ext = FakeExt::new().with_wasm();
 
 	let gas_left = {
-		let mut interpreter = wasm_interpreter(params);
+		let interpreter = wasm_interpreter(params);
 		test_finalize(interpreter.exec(&mut ext).ok().unwrap()).unwrap()
 	};
 
@@ -160,7 +160,7 @@ fn identity() {
 	let mut ext = FakeExt::new().with_wasm();
 
 	let (gas_left, result) = {
-		let mut interpreter = wasm_interpreter(params);
+		let interpreter = wasm_interpreter(params);
 		let result = interpreter.exec(&mut ext).ok().unwrap().expect("Interpreter to execute without any errors");
 		match result {
 			GasLeft::Known(_) => { panic!("Identity contract should return payload"); },
@@ -195,7 +195,7 @@ fn dispersion() {
 	let mut ext = FakeExt::new().with_wasm();
 
 	let (gas_left, result) = {
-		let mut interpreter = wasm_interpreter(params);
+		let interpreter = wasm_interpreter(params);
 		let result = interpreter.exec(&mut ext).ok().unwrap().expect("Interpreter to execute without any errors");
 		match result {
 			GasLeft::Known(_) => { panic!("Dispersion routine should return payload"); },
@@ -223,7 +223,7 @@ fn suicide_not() {
 	let mut ext = FakeExt::new().with_wasm();
 
 	let (gas_left, result) = {
-		let mut interpreter = wasm_interpreter(params);
+		let interpreter = wasm_interpreter(params);
 		let result = interpreter.exec(&mut ext).ok().unwrap().expect("Interpreter to execute without any errors");
 		match result {
 			GasLeft::Known(_) => { panic!("Suicidal contract should return payload when had not actualy killed himself"); },
@@ -256,7 +256,7 @@ fn suicide() {
 	let mut ext = FakeExt::new().with_wasm();
 
 	let gas_left = {
-		let mut interpreter = wasm_interpreter(params);
+		let interpreter = wasm_interpreter(params);
 		let result = interpreter.exec(&mut ext).ok().unwrap().expect("Interpreter to execute without any errors");
 		match result {
 			GasLeft::Known(gas) => gas,

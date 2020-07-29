@@ -14,16 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Parity Ethereum.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Cost schedule and other parameterisations for the EVM.
-use std::collections::HashMap;
-use ethereum_types::U256;
-
-/// Definition of schedules that can be applied to a version.
-#[derive(Debug)]
-pub enum VersionedSchedule {
-	PWasm,
-}
-
 /// Definition of the cost schedule and other parameterisations for the EVM.
 #[derive(Debug)]
 pub struct Schedule {

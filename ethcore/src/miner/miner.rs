@@ -245,7 +245,7 @@ pub struct Miner {
 	options: MinerOptions,
 	// TODO [ToDr] Arc is only required because of price updater
 	transaction_queue: Arc<TransactionQueue>,
-	engine: Arc<EthEngine>,
+	engine: Arc<dyn EthEngine>,
 	accounts: Arc<LocalAccounts>,
 	io_channel: RwLock<Option<IoChannel<ClientIoMessage>>>,
 	service_transaction_checker: Option<ServiceTransactionChecker>,

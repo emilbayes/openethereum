@@ -57,11 +57,12 @@
 // error_chain foreign_links.
 #![recursion_limit="128"]
 
+#![allow(missing_docs)]
+
 extern crate ansi_term;
 extern crate byteorder;
 extern crate common_types as types;
 extern crate crossbeam_utils;
-extern crate eip_152;
 extern crate ethabi;
 extern crate ethash;
 extern crate ethcore_blockchain as blockchain;

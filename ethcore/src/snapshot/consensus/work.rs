@@ -224,7 +224,7 @@ impl PowRebuilder {
 impl Rebuilder for PowRebuilder {
 	/// Feed the rebuilder an uncompressed block chunk.
 	/// Returns the number of blocks fed or any errors.
-	fn feed(&mut self, chunk: &[u8], engine: &EthEngine, abort_flag: &AtomicBool) -> Result<(), ::error::Error> {
+	fn feed(&mut self, chunk: &[u8], engine: &dyn EthEngine, abort_flag: &AtomicBool) -> Result<(), ::error::Error> {
 		use snapshot::verify_old_block;
 		use ethereum_types::U256;
 		use triehash::ordered_trie_root;
@@ -298,7 +298,7 @@ impl Rebuilder for PowRebuilder {
 	}
 
 	/// Glue together any disconnected chunks and check that the chain is complete.
-	fn finalize(&mut self, _: &EthEngine) -> Result<(), ::error::Error> {
+	fn finalize(&mut self, _: &dyn EthEngine) -> Result<(), ::error::Error> {
 		let mut batch = self.db.transaction();
 
 		for (first_num, first_hash) in self.disconnected.drain(..) {

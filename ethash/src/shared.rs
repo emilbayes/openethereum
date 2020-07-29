@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Parity Ethereum.  If not, see <http://www.gnu.org/licenses/>.
 
+#![allow(deprecated)]
+
 use primal::is_prime;
 
 pub const DATASET_BYTES_INIT: u64 = 1 << 30;

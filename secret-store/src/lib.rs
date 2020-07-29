@@ -148,7 +148,7 @@ pub fn start(client: Arc<Client>, sync: Arc<SyncProvider>, miner: Arc<Miner>, se
 			listener::ApiMask { document_key_shadow_retrieval_requests: true, ..Default::default() }))
 		.map(|l| contracts.push(l));
 
-	let contract: Option<Arc<listener::service_contract::ServiceContract>> = match contracts.len() {
+	let contract: Option<Arc<dyn listener::service_contract::ServiceContract>> = match contracts.len() {
 		0 => None,
 		1 => Some(contracts.pop().expect("contract.len() is 1; qed")),
 		_ => Some(Arc::new(listener::service_contract_aggregate::OnChainServiceContractAggregate::new(contracts))),

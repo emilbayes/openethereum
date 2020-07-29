@@ -16,8 +16,6 @@
 
 //! Standard built-in contracts.
 
-#![warn(missing_docs)]
-
 use std::{
 	cmp::{max, min},
 	collections::BTreeMap,

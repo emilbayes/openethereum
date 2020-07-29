@@ -19,7 +19,6 @@
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering as AtomicOrder};
 use std::sync::Arc;
 use std::collections::{HashMap, BTreeMap};
-use std::mem;
 
 use blockchain::{TreeRoute, BlockReceipts};
 use bytes::Bytes;
@@ -564,7 +563,7 @@ impl ImportBlock for TestBlockChainClient {
 				let mut difficulty = self.difficulty.write();
 				*difficulty = *difficulty + header.difficulty().clone();
 			}
-			mem::replace(&mut *self.last_hash.write(), h.clone());
+			*self.last_hash.write() = h.clone();
 			self.blocks.write().insert(h.clone(), unverified.bytes);
 			self.numbers.write().insert(number, h.clone());
 			let mut parent_hash = header.parent_hash().clone();
@@ -629,7 +628,7 @@ impl StateClient for TestBlockChainClient {
 }
 
 impl EngineInfo for TestBlockChainClient {
-	fn engine(&self) -> &EthEngine {
+	fn engine(&self) -> &dyn EthEngine {
 		unimplemented!()
 	}
 }
@@ -652,7 +651,7 @@ impl BlockChainClient for TestBlockChainClient {
 		self.execution_result.read().clone().unwrap()
 	}
 
-	fn replay_block_transactions(&self, _block: BlockId, _analytics: CallAnalytics) -> Result<Box<Iterator<Item = (H256, Executed)>>, CallError> {
+	fn replay_block_transactions(&self, _block: BlockId, _analytics: CallAnalytics) -> Result<Box<dyn Iterator<Item = (H256, Executed)>>, CallError> {
 		Ok(Box::new(self.traces.read().clone().unwrap().into_iter().map(|t| t.transaction_hash.unwrap_or(H256::new())).zip(self.execution_result.read().clone().unwrap().into_iter())))
 	}
 
@@ -948,7 +947,7 @@ impl super::traits::EngineClient for TestBlockChainClient {
 		None
 	}
 
-	fn as_full_client(&self) -> Option<&BlockChainClient> { Some(self) }
+	fn as_full_client(&self) -> Option<&dyn BlockChainClient> { Some(self) }
 
 	fn block_number(&self, id: BlockId) -> Option<BlockNumber> {
 		BlockChainClient::block_number(self, id)

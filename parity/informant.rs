@@ -118,8 +118,8 @@ pub trait InformantData: Send + Sync {
 /// Informant data for a full node.
 pub struct FullNodeInformantData {
 	pub client: Arc<Client>,
-	pub sync: Option<Arc<SyncProvider>>,
-	pub net: Option<Arc<ManageNetwork>>,
+	pub sync: Option<Arc<dyn SyncProvider>>,
+	pub net: Option<Arc<dyn ManageNetwork>>,
 }
 
 impl InformantData for FullNodeInformantData {
@@ -259,7 +259,7 @@ impl<T: InformantData> Informant<T> {
 		let elapsed = now.duration_since(*self.last_tick.read());
 
 		let (client_report, full_report) = {
-			let mut last_report = self.last_report.lock();
+			let last_report = self.last_report.lock();
 			let full_report = self.target.report();
 			let diffed = full_report.client_report.clone() - &*last_report;
 			(diffed, full_report)

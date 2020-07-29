@@ -395,7 +395,7 @@ pub struct AdminSessionCreator {
 	/// Administrator public.
 	pub admin_public: Option<Public>,
 	/// Servers set change sessions creator connector.
-	pub servers_set_change_session_creator_connector: Arc<ServersSetChangeSessionCreatorConnector>,
+	pub servers_set_change_session_creator_connector: Arc<dyn ServersSetChangeSessionCreatorConnector>,
 }
 
 impl ClusterSessionCreator<AdminSession, AdminSessionCreationData> for AdminSessionCreator {

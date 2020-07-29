@@ -35,7 +35,7 @@ pub type SyncModules = (
 pub fn sync(
 	config: SyncConfig,
 	network_config: NetworkConfiguration,
-	chain: Arc<BlockChainClient>,
+	chain: Arc<dyn BlockChainClient>,
 	snapshot_service: Arc<SnapshotService>,
 	private_tx_handler: Option<Arc<PrivateTxHandler>>,
 	provider: Arc<Provider>,

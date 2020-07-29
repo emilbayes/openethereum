@@ -33,7 +33,7 @@ pub trait Memory {
 	/// Read a word from memory
 	fn read(&self, offset: U256) -> U256;
 	/// Write slice of bytes to memory. Does not resize memory!
-	fn write_slice(&mut self, offset: U256, &[u8]);
+	fn write_slice(&mut self, offset: U256, slice: &[u8]);
 	/// Retrieve part of the memory between offset and offset + size
 	fn read_slice(&self, offset: U256, size: U256) -> &[u8];
 	/// Retrieve writeable part of memory
@@ -136,7 +136,7 @@ mod tests {
 	#[test]
 	fn test_memory_read_and_write() {
 		// given
-		let mem: &mut Memory = &mut vec![];
+		let mem: &mut dyn Memory = &mut vec![];
 		mem.resize(0x80 + 32);
 
 		// when
@@ -149,7 +149,7 @@ mod tests {
 	#[test]
 	fn test_memory_read_and_write_byte() {
 		// given
-		let mem: &mut Memory = &mut vec![];
+		let mem: &mut dyn Memory = &mut vec![];
 		mem.resize(32);
 
 		// when
@@ -163,7 +163,7 @@ mod tests {
 
 	#[test]
 	fn test_memory_read_slice_and_write_slice() {
-		let mem: &mut Memory = &mut vec![];
+		let mem: &mut dyn Memory = &mut vec![];
 		mem.resize(32);
 
 		{

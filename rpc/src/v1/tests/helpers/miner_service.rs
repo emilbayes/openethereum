@@ -100,7 +100,7 @@ impl StateClient for TestMinerService {
 }
 
 impl EngineInfo for TestMinerService {
-	fn engine(&self) -> &EthEngine {
+	fn engine(&self) -> &dyn EthEngine {
 		unimplemented!()
 	}
 }

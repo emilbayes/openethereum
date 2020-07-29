@@ -2852,9 +2852,9 @@ dependencies = [
 
 [[package]]
 name = "memory-db"
-version = "0.22.0"
+version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "89fbfa526b4b3bb77997c014e1161410c92c28c9bd811fd562be6e5f4c69fa77"
+checksum = "36f36ddb0b2cdc25d38babba472108798e3477f02be5165f038c5e393e50c57a"
 dependencies = [
  "hash-db",
  "hashbrown 0.8.0",

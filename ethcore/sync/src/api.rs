@@ -533,7 +533,7 @@ impl NetworkProtocolHandler for SyncProtocolHandler {
 	}
 
 	fn timeout(&self, io: &dyn NetworkContext, timer: TimerToken) {
-		trace_time!("sync::timeout");
+		trace_time!("sync::timeout test");
 		let mut io = NetSyncIo::new(io, &*self.chain, &*self.snapshot_service, &self.overlay, self.private_state.clone());
 		match timer {
 			PEERS_TIMER => self.sync.write().maintain_peers(&mut io),
